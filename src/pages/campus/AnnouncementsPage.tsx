@@ -48,11 +48,14 @@ export const AnnouncementsPage: React.FC = () => {
   const [targetAudience, setTargetAudience] = useState('All Campus Students');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const activeCollegeId = college?.id || profile?.college_id;
+
   const loadAnnouncements = async () => {
     setIsLoading(true);
     try {
       const data = await campusService.getAnnouncements(
-        selectedPriority === 'all' ? undefined : selectedPriority
+        selectedPriority === 'all' ? undefined : selectedPriority,
+        activeCollegeId
       );
       setAnnouncements(data);
     } catch (err: any) {
@@ -64,7 +67,7 @@ export const AnnouncementsPage: React.FC = () => {
 
   useEffect(() => {
     loadAnnouncements();
-  }, [selectedPriority]);
+  }, [selectedPriority, activeCollegeId]);
 
   const handleCreateAnnouncement = async (e: React.FormEvent) => {
     e.preventDefault();

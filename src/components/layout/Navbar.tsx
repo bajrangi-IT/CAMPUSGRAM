@@ -37,8 +37,9 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenMobileMenu, onCreateClick 
 
       {/* College Info Pill */}
       {college && (
-        <div className="hidden sm:flex items-center rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700 max-w-[200px] truncate">
-          {college.name}
+        <div className="flex items-center space-x-1.5 rounded-full bg-indigo-50 border border-indigo-200/70 px-2.5 py-1 text-[11px] font-bold text-indigo-700 max-w-[150px] sm:max-w-[220px] truncate shadow-2xs">
+          <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 shrink-0" />
+          <span className="truncate">{college.name.split('(')[0].trim()}</span>
         </div>
       )}
 

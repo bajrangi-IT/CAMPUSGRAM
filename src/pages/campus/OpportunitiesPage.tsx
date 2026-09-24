@@ -34,7 +34,7 @@ const OPPORTUNITY_CATEGORIES = [
 ];
 
 export const OpportunitiesPage: React.FC = () => {
-  const { user, college } = useAuth();
+  const { user, profile, college } = useAuth();
   const [opportunities, setOpportunities] = useState<Opportunity[]>([]);
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [isLoading, setIsLoading] = useState(true);
@@ -51,11 +51,14 @@ export const OpportunitiesPage: React.FC = () => {
   const [applyUrl, setApplyUrl] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const activeCollegeId = college?.id || profile?.college_id;
+
   const loadOpportunities = async () => {
     setIsLoading(true);
     try {
       const data = await campusService.getOpportunities(
-        selectedCategory === 'All' ? undefined : selectedCategory
+        selectedCategory === 'All' ? undefined : selectedCategory,
+        activeCollegeId
       );
       setOpportunities(data);
     } catch (err: any) {
@@ -67,7 +70,7 @@ export const OpportunitiesPage: React.FC = () => {
 
   useEffect(() => {
     loadOpportunities();
-  }, [selectedCategory]);
+  }, [selectedCategory, activeCollegeId]);
 
   const handlePostOpportunity = async (e: React.FormEvent) => {
     e.preventDefault();

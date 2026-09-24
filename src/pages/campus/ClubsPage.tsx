@@ -69,10 +69,16 @@ export const ClubsPage: React.FC = () => {
   const [eventDate, setEventDate] = useState('');
   const [eventVenue, setEventVenue] = useState('');
 
+  const activeCollegeId = college?.id || profile?.college_id;
+
   const loadClubs = async () => {
     setIsLoading(true);
     try {
-      const data = await campusService.getClubs(selectedCategory === 'All' ? undefined : selectedCategory);
+      const data = await campusService.getClubs(
+        selectedCategory === 'All' ? undefined : selectedCategory,
+        activeCollegeId,
+        user?.id
+      );
       setClubs(data);
 
       if (user) {
@@ -96,7 +102,7 @@ export const ClubsPage: React.FC = () => {
 
   useEffect(() => {
     loadClubs();
-  }, [selectedCategory, user?.id]);
+  }, [selectedCategory, user?.id, activeCollegeId]);
 
   const handleOpenClub = async (club: Club) => {
     setSelectedClub(club);

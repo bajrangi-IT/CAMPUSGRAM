@@ -43,10 +43,12 @@ export const TeamFinderPage: React.FC = () => {
   const [interestTarget, setInterestTarget] = useState<TeamRequest | null>(null);
   const [pitchMessage, setPitchMessage] = useState('');
 
+  const activeCollegeId = college?.id || profile?.college_id;
+
   const loadRequests = async () => {
     setIsLoading(true);
     try {
-      const data = await campusService.getTeamRequests();
+      const data = await campusService.getTeamRequests(activeCollegeId);
       setRequests(data);
     } catch (err: any) {
       toast.error('Failed to load team requests', { description: err.message });
@@ -57,7 +59,7 @@ export const TeamFinderPage: React.FC = () => {
 
   useEffect(() => {
     loadRequests();
-  }, []);
+  }, [activeCollegeId]);
 
   const handlePostRequest = async (e: React.FormEvent) => {
     e.preventDefault();

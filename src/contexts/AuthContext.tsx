@@ -2,17 +2,9 @@ import React, { createContext, useContext, useEffect, useState, useCallback } fr
 import { User, Session, AuthError } from '@supabase/supabase-js';
 import { supabase, isSupabaseConfigured } from '@/lib/supabase';
 import { Profile, College, UserRole } from '@/types/database.types';
+import { RECOGNIZED_COLLEGES, getCollegeById, getAllColleges } from '@/services/collegesService';
 
-export const DEFAULT_COLLEGE: College = {
-  id: 'col-iitb',
-  name: 'Indian Institute of Technology, Bombay',
-  logo: 'https://images.unsplash.com/photo-1562774053-701939374585?w=128&auto=format&fit=crop&q=80',
-  domain: 'iitb.ac.in',
-  description: 'Premier engineering and research institution in Mumbai, India.',
-  status: 'active',
-  created_at: '2024-01-01T00:00:00.000Z',
-  updated_at: '2024-01-01T00:00:00.000Z',
-};
+export const DEFAULT_COLLEGE: College = RECOGNIZED_COLLEGES[0];
 
 export const ASHU_USER = {
   user: {
@@ -48,7 +40,7 @@ export const ASHU_USER = {
     interests: ['Cloud Architecture', 'Open Source', 'Hackathons', 'High Scale Systems'],
     is_verified: true,
     phone_verified: true,
-    onboarding_step: 3,
+    onboarding_step: 5,
     onboarding_completed: true,
     created_at: '2024-01-01T00:00:00.000Z',
     updated_at: new Date().toISOString(),
@@ -91,7 +83,7 @@ export const BUSINESS_USER = {
     interests: ['Hiring', 'Student Perks', 'Internships'],
     is_verified: true,
     phone_verified: true,
-    onboarding_step: 3,
+    onboarding_step: 5,
     onboarding_completed: true,
     created_at: '2024-01-01T00:00:00.000Z',
     updated_at: new Date().toISOString(),
@@ -130,6 +122,7 @@ interface AuthContextType {
   updateProfile: (updates: Partial<Profile>) => Promise<{ error?: Error | null }>;
   refreshProfile: () => Promise<void>;
   hasRole: (role: UserRole) => boolean;
+  switchCampus: (college: College) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -138,40 +131,33 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
-  const [college, setCollege] = useState<College | null>(DEFAULT_COLLEGE);
-  const [roles, setRoles] = useState<UserRole[]>(['student', 'college_admin']);
+  const [college, setCollege] = useState<College | null>(null);
+  const [roles, setRoles] = useState<UserRole[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Initialize session: check local storage first, fallback to ashu.devops default
+  // Initialize session: strictly check if a user is logged in
   const initLocalSession = useCallback(() => {
     try {
       const stored = localStorage.getItem('campusgram_auth_user');
       if (stored) {
         const parsed = JSON.parse(stored);
-        setUser(parsed.user);
-        setProfile(parsed.profile);
-        setCollege(parsed.college || DEFAULT_COLLEGE);
-        setRoles(parsed.roles || ['student']);
-        return true;
+        if (parsed.user && parsed.profile) {
+          setUser(parsed.user);
+          setProfile(parsed.profile);
+          setCollege(parsed.college || getCollegeById(parsed.profile?.college_id) || DEFAULT_COLLEGE);
+          setRoles(parsed.roles || ['student']);
+          return true;
+        }
       }
     } catch (e) {
       console.warn('Failed to parse local auth user:', e);
     }
-    // Default to ashu.devops if no explicit session
-    setUser(ASHU_USER.user);
-    setProfile(ASHU_USER.profile);
-    setCollege(DEFAULT_COLLEGE);
-    setRoles(ASHU_USER.roles);
-    localStorage.setItem(
-      'campusgram_auth_user',
-      JSON.stringify({
-        user: ASHU_USER.user,
-        profile: ASHU_USER.profile,
-        college: DEFAULT_COLLEGE,
-        roles: ASHU_USER.roles,
-      })
-    );
-    return true;
+    // No logged in user -> stay logged out
+    setUser(null);
+    setProfile(null);
+    setCollege(null);
+    setRoles([]);
+    return false;
   }, []);
 
   // Fetch complete profile & role data for the logged-in user from Supabase if active
@@ -197,10 +183,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         if (profileData.college) {
           setCollege(profileData.college as College);
         } else {
-          setCollege(DEFAULT_COLLEGE);
+          setCollege(getCollegeById(profileData.college_id));
         }
       } else if (currentUser) {
         const meta = currentUser.user_metadata || {};
+        const assignedCollege = getCollegeById(meta.college_id);
         const fallbackProfile: Profile = {
           id: currentUser.id,
           full_name: meta.full_name || 'Ashu DevOps',
@@ -209,8 +196,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           phone: currentUser.phone || meta.phone || null,
           profile_photo: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&auto=format&fit=crop&q=80',
           cover_photo: null,
-          college_id: meta.college_id || 'col-iitb',
-          college: DEFAULT_COLLEGE,
+          college_id: meta.college_id || assignedCollege.id,
+          college: assignedCollege,
           course: meta.course || 'B.Tech Computer Science',
           branch: meta.branch || 'DevOps & Systems',
           year: meta.year || 'Final Year',
@@ -219,13 +206,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           interests: ['Tech', 'Campus'],
           is_verified: true,
           phone_verified: true,
-          onboarding_step: 3,
+          onboarding_step: 5,
           onboarding_completed: true,
           created_at: currentUser.created_at || new Date().toISOString(),
           updated_at: new Date().toISOString(),
         };
         setProfile(fallbackProfile);
-        setCollege(DEFAULT_COLLEGE);
+        setCollege(assignedCollege);
       }
 
       const { data: rolesData } = await supabase
@@ -302,11 +289,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     role = 'student',
   }: SignUpParams) => {
     const cleanUsername = email.split('@')[0].toLowerCase().replace(/[^a-z0-9_]/g, '');
+    const assignedCollege = getCollegeById(collegeId);
 
     const newLocalUser: User = {
       id: `usr-${Date.now()}`,
       app_metadata: { provider: 'email' },
-      user_metadata: { full_name: fullName, username: cleanUsername, role },
+      user_metadata: { full_name: fullName, username: cleanUsername, role, college_id: assignedCollege.id },
       aud: 'authenticated',
       created_at: new Date().toISOString(),
       email,
@@ -323,28 +311,27 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       phone: phone || null,
       profile_photo: `https://api.dicebear.com/7.x/avataaars/svg?seed=${cleanUsername}`,
       cover_photo: null,
-      college_id: collegeId || 'col-iitb',
-      college: DEFAULT_COLLEGE,
+      college_id: assignedCollege.id,
+      college: assignedCollege,
       course: course || 'Computer Science',
       branch: branch || 'Engineering',
       year: year || '1st Year',
-      bio: 'Excited to join the CampusGram community!',
+      bio: `Student at ${assignedCollege.name}. Excited to join CampusGram!`,
       skills: [],
       interests: [],
       is_verified: true,
-      phone_verified: true,
-      onboarding_step: 3,
-      onboarding_completed: true,
+      phone_verified: false,
+      onboarding_step: 1, // Start onboarding at step 1: Campus confirmation
+      onboarding_completed: false,
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
     };
 
     const newRoles: UserRole[] = role === 'business' ? ['business', 'advertiser'] : ['student'];
 
-    // Save locally
     setUser(newLocalUser);
     setProfile(newProfile);
-    setCollege(DEFAULT_COLLEGE);
+    setCollege(assignedCollege);
     setRoles(newRoles);
 
     localStorage.setItem(
@@ -352,12 +339,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       JSON.stringify({
         user: newLocalUser,
         profile: newProfile,
-        college: DEFAULT_COLLEGE,
+        college: assignedCollege,
         roles: newRoles,
       })
     );
 
-    // Also persist in custom registered users list
     try {
       const existing = JSON.parse(localStorage.getItem('campusgram_registered_users') || '[]');
       existing.push({
@@ -366,6 +352,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         password,
         user: newLocalUser,
         profile: newProfile,
+        college: assignedCollege,
         roles: newRoles,
       });
       localStorage.setItem('campusgram_registered_users', JSON.stringify(existing));
@@ -383,7 +370,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
               full_name: fullName,
               username: cleanUsername,
               phone,
-              college_id: collegeId,
+              college_id: assignedCollege.id,
               course,
               branch,
               year,
@@ -468,16 +455,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       if (found) {
         if (found.password === password) {
+          const userCollege = found.college || getCollegeById(found.profile?.college_id) || DEFAULT_COLLEGE;
           setUser(found.user);
           setProfile(found.profile);
-          setCollege(DEFAULT_COLLEGE);
+          setCollege(userCollege);
           setRoles(found.roles);
           localStorage.setItem(
             'campusgram_auth_user',
             JSON.stringify({
               user: found.user,
               profile: found.profile,
-              college: DEFAULT_COLLEGE,
+              college: userCollege,
               roles: found.roles,
             })
           );
@@ -519,6 +507,25 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       await supabase.auth.signOut();
     }
     return { error: null };
+  };
+
+  const switchCampus = (newCollege: College) => {
+    setCollege(newCollege);
+    if (profile) {
+      const updated = { ...profile, college_id: newCollege.id, college: newCollege };
+      setProfile(updated);
+      if (user) {
+        localStorage.setItem(
+          'campusgram_auth_user',
+          JSON.stringify({
+            user,
+            profile: updated,
+            college: newCollege,
+            roles,
+          })
+        );
+      }
+    }
   };
 
   const sendPhoneOtp = async (phone: string) => {
@@ -586,6 +593,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         updateProfile,
         refreshProfile,
         hasRole,
+        switchCampus,
       }}
     >
       {children}

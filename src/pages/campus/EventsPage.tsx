@@ -29,7 +29,7 @@ import type { EventItem, EventCheckin, Club } from '@/types/campus.types';
 import { toast } from 'sonner';
 
 export const EventsPage: React.FC = () => {
-  const { user, college } = useAuth();
+  const { user, profile, college } = useAuth();
   const [activeTab, setActiveTab] = useState<'upcoming' | 'registered' | 'past'>('upcoming');
   const [events, setEvents] = useState<EventItem[]>([]);
   const [clubs, setClubs] = useState<Club[]>([]);
@@ -54,10 +54,12 @@ export const EventsPage: React.FC = () => {
   const [isCheckingIn, setIsCheckingIn] = useState(false);
   const [checkinLogs, setCheckinLogs] = useState<EventCheckin[]>([]);
 
+  const activeCollegeId = college?.id || profile?.college_id;
+
   const loadEvents = async () => {
     setIsLoading(true);
     try {
-      const data = await campusService.getEvents(activeTab, user?.id);
+      const data = await campusService.getEvents(activeTab, user?.id, activeCollegeId);
       setEvents(data);
     } catch (err: any) {
       toast.error('Failed to load campus events', { description: err.message });
@@ -68,7 +70,7 @@ export const EventsPage: React.FC = () => {
 
   const loadClubs = async () => {
     try {
-      const clubData = await campusService.getClubs();
+      const clubData = await campusService.getClubs(undefined, activeCollegeId);
       setClubs(clubData);
     } catch (err) {
       console.error(err);
@@ -77,11 +79,11 @@ export const EventsPage: React.FC = () => {
 
   useEffect(() => {
     loadEvents();
-  }, [activeTab, user?.id]);
+  }, [activeTab, user?.id, activeCollegeId]);
 
   useEffect(() => {
     loadClubs();
-  }, []);
+  }, [activeCollegeId]);
 
   const handleRegisterToggle = async (event: EventItem) => {
     if (!user) {

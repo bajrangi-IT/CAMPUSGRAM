@@ -12,11 +12,398 @@ import {
 } from '@/types/campus.types';
 
 // ==========================================
+// LOCAL STORAGE & MULTI-CAMPUS SEED STORES
+// ==========================================
+
+const SEED_CLUBS: Club[] = [
+  // IIT Bombay
+  {
+    id: 'club-iitb-1',
+    college_id: 'col-iitb',
+    name: 'Web & Coding Club (WnCC)',
+    slug: 'wncc-iitb',
+    category: 'Technical',
+    description: 'The official programming and software engineering community of IIT Bombay.',
+    logo: 'https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=160&auto=format&fit=crop&q=80',
+    cover_image: 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=1000&auto=format&fit=crop&q=80',
+    created_by: 'ashu-devops-iitb',
+    created_at: '2026-09-01T10:00:00Z',
+    updated_at: '2026-09-01T10:00:00Z',
+    member_count: 340,
+    is_member: true,
+    is_admin: true,
+  },
+  {
+    id: 'club-iitb-2',
+    college_id: 'col-iitb',
+    name: 'Mood Indigo Cultural Council',
+    slug: 'mood-indigo-iitb',
+    category: 'Cultural',
+    description: 'Asia’s largest college cultural festival committee and student arts society.',
+    logo: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=160&auto=format&fit=crop&q=80',
+    cover_image: 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=1000&auto=format&fit=crop&q=80',
+    created_by: 'priya-iitb',
+    created_at: '2026-09-02T10:00:00Z',
+    updated_at: '2026-09-02T10:00:00Z',
+    member_count: 820,
+    is_member: false,
+    is_admin: false,
+  },
+  // Delhi University
+  {
+    id: 'club-du-1',
+    college_id: 'col-du',
+    name: 'DU Debating Society (DebSoc)',
+    slug: 'debsoc-du',
+    category: 'Academic',
+    description: 'Parliamentary debating, diplomacy summits, and inter-college oratory tournaments.',
+    logo: 'https://images.unsplash.com/photo-1475721027785-f74eccf877e2?w=160&auto=format&fit=crop&q=80',
+    cover_image: 'https://images.unsplash.com/photo-1475721027785-f74eccf877e2?w=1000&auto=format&fit=crop&q=80',
+    created_by: 'rahul-du',
+    created_at: '2026-09-05T10:00:00Z',
+    updated_at: '2026-09-05T10:00:00Z',
+    member_count: 210,
+    is_member: false,
+    is_admin: false,
+  },
+  // BITS Pilani
+  {
+    id: 'club-bits-1',
+    college_id: 'col-bits',
+    name: 'APOGEE Tech Society',
+    slug: 'apogee-bits',
+    category: 'Technical',
+    description: 'Innovating robotics, aerospace, algorithmic challenges, and annual tech conclaves.',
+    logo: 'https://images.unsplash.com/photo-1485827404703-89b55fcc595e?w=160&auto=format&fit=crop&q=80',
+    cover_image: 'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=1000&auto=format&fit=crop&q=80',
+    created_by: 'bits-lead',
+    created_at: '2026-09-08T10:00:00Z',
+    updated_at: '2026-09-08T10:00:00Z',
+    member_count: 450,
+    is_member: false,
+    is_admin: false,
+  },
+];
+
+const SEED_EVENTS: EventItem[] = [
+  // IIT Bombay
+  {
+    id: 'ev-iitb-1',
+    college_id: 'col-iitb',
+    organizer_id: 'ashu-devops-iitb',
+    title: 'Autumn Hackathon 2026: Cloud & AI Sprint',
+    description: '36-hour sprint building decentralized campus applications and AI copilots. Cash prizes & direct mentor interviews!',
+    location: 'FC Kohli Auditorium, CS Department',
+    start_time: '2026-10-15T09:00:00Z',
+    end_time: '2026-10-16T21:00:00Z',
+    capacity: 200,
+    banner_url: 'https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=1000&auto=format&fit=crop&q=80',
+    status: 'upcoming',
+    created_at: '2026-09-10T08:00:00Z',
+    is_registered: true,
+    is_checked_in: false,
+    registered_count: 96,
+  },
+  {
+    id: 'ev-iitb-2',
+    college_id: 'col-iitb',
+    organizer_id: 'priya-iitb',
+    title: 'E-Summit Leadership Keynote',
+    description: 'Fireside chat with prominent startup founders and venture partners on scaling deep-tech from university labs.',
+    location: 'Convocation Hall',
+    start_time: '2026-10-22T14:00:00Z',
+    end_time: '2026-10-22T17:30:00Z',
+    capacity: 500,
+    banner_url: 'https://images.unsplash.com/photo-1475721027785-f74eccf877e2?w=1000&auto=format&fit=crop&q=80',
+    status: 'upcoming',
+    created_at: '2026-09-12T08:00:00Z',
+    is_registered: false,
+    is_checked_in: false,
+    registered_count: 312,
+  },
+  // Delhi University
+  {
+    id: 'ev-du-1',
+    college_id: 'col-du',
+    organizer_id: 'rahul-du',
+    title: 'National Parliamentary Debate Open',
+    description: 'Premier Asian parliamentary debate tournament hosted across North Campus colleges with international adjudicators.',
+    location: 'St. Stephen’s College Seminar Hall',
+    start_time: '2026-10-18T10:00:00Z',
+    end_time: '2026-10-19T18:00:00Z',
+    capacity: 150,
+    banner_url: 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=1000&auto=format&fit=crop&q=80',
+    status: 'upcoming',
+    created_at: '2026-09-14T08:00:00Z',
+    is_registered: false,
+    is_checked_in: false,
+    registered_count: 85,
+  },
+  // BITS Pilani
+  {
+    id: 'ev-bits-1',
+    college_id: 'col-bits',
+    organizer_id: 'bits-lead',
+    title: 'Oasis Music & Pro-Nite Extravaganza',
+    description: 'Annual cultural festival headlined by prominent national indie bands and battle of the bands.',
+    location: 'BITS Auditorium & Gym Grounds',
+    start_time: '2026-11-05T18:00:00Z',
+    end_time: '2026-11-07T23:00:00Z',
+    capacity: 1200,
+    banner_url: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=1000&auto=format&fit=crop&q=80',
+    status: 'upcoming',
+    created_at: '2026-09-15T08:00:00Z',
+    is_registered: false,
+    is_checked_in: false,
+    registered_count: 640,
+  },
+];
+
+const SEED_ANNOUNCEMENTS: Announcement[] = [
+  // IIT Bombay
+  {
+    id: 'ann-iitb-1',
+    college_id: 'col-iitb',
+    author_id: 'admin-iitb',
+    author_role: 'college_admin',
+    title: 'Mid-Semester Examination Schedule Autumn 2026 Released',
+    content: 'The academic office has published the finalized exam timetable on the ASC portal. Slot clashes must be reported within 48 hours to the department coordinator.',
+    priority: 'urgent',
+    target_audience: 'all',
+    created_at: '2026-09-20T09:30:00Z',
+  },
+  {
+    id: 'ann-iitb-2',
+    college_id: 'col-iitb',
+    author_id: 'hostel-affairs',
+    author_role: 'college_admin',
+    title: 'Hostel Night Mess & Dining Committee Election',
+    content: 'Nominations are invited for Mess Councilors for Hostels 12, 13, and 14. Submit physical forms before Friday 5 PM.',
+    priority: 'normal',
+    target_audience: 'hostelers',
+    created_at: '2026-09-18T14:00:00Z',
+  },
+  // Delhi University
+  {
+    id: 'ann-du-1',
+    college_id: 'col-du',
+    author_id: 'admin-du',
+    author_role: 'college_admin',
+    title: 'Semester End Examination Form Submission Deadline',
+    content: 'All undergraduate students must ensure exam registration fees and admit card validation is completed by October 10.',
+    priority: 'urgent',
+    target_audience: 'all',
+    created_at: '2026-09-21T11:00:00Z',
+  },
+];
+
+const SEED_RESOURCES: ResourceItem[] = [
+  // IIT Bombay
+  {
+    id: 'res-iitb-1',
+    college_id: 'col-iitb',
+    uploader_id: 'ashu-devops-iitb',
+    title: 'CS213 Data Structures & Algorithms Handout + PYQs',
+    description: 'Comprehensive handwritten lecture notes, red-black trees cheat sheet, and 5 years solved midsem problems.',
+    course: 'Computer Science & Engineering',
+    subject: 'Data Structures & Algorithms',
+    semester: 'Semester 3',
+    file_url: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf',
+    file_type: 'pdf',
+    file_size: 4200000,
+    downloads_count: 512,
+    verification_status: 'faculty_verified',
+    created_at: '2026-09-08T10:00:00Z',
+  },
+  {
+    id: 'res-iitb-2',
+    college_id: 'col-iitb',
+    uploader_id: 'priya-iitb',
+    title: 'EE101 Electrical & Electronics Fundamentals Formula Sheet',
+    description: 'RLC transient circuits, Norton-Thevenin theorem summaries, and lab exam revision questions.',
+    course: 'Electronics & Communication',
+    subject: 'Analog Electronics',
+    semester: 'Semester 2',
+    file_url: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf',
+    file_type: 'pdf',
+    file_size: 2100000,
+    downloads_count: 320,
+    verification_status: 'student_uploaded',
+    created_at: '2026-09-12T14:30:00Z',
+  },
+  // Delhi University
+  {
+    id: 'res-du-1',
+    college_id: 'col-du',
+    uploader_id: 'rahul-du',
+    title: 'Microeconomics Theory - Past 10 Years Solved Questions',
+    description: 'Detailed answers for consumer equilibrium, game theory, and market dynamics curated from St. Stephens faculty notes.',
+    course: 'Business Administration',
+    subject: 'Microeconomics',
+    semester: 'Semester 1',
+    file_url: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf',
+    file_type: 'pdf',
+    file_size: 3500000,
+    downloads_count: 289,
+    verification_status: 'faculty_verified',
+    created_at: '2026-09-14T10:00:00Z',
+  },
+];
+
+const SEED_OPPORTUNITIES: Opportunity[] = [
+  // IIT Bombay
+  {
+    id: 'opp-iitb-1',
+    college_id: 'col-iitb',
+    creator_id: 'ashu-devops-iitb',
+    title: 'Research Assistant in Distributed Systems & Kubernetes',
+    organization: 'Computer Systems Research Lab (IIT Bombay)',
+    type: 'research' as any,
+    location: 'Kanwal Rekhi Building, Room 204',
+    deadline: '2026-10-30',
+    link: 'https://cs.iitb.ac.in',
+    created_at: '2026-09-15T09:00:00Z',
+  },
+  {
+    id: 'opp-iitb-2',
+    college_id: 'col-iitb',
+    creator_id: 'alumni-iitb',
+    title: 'Winter Software Engineering Intern (Frontend / React)',
+    organization: 'CampusGram Core Labs',
+    type: 'internship' as any,
+    location: 'Remote / Hybrid (Powai)',
+    deadline: '2026-11-15',
+    link: 'https://campusgram.edu',
+    created_at: '2026-09-18T12:00:00Z',
+  },
+  // Delhi University
+  {
+    id: 'opp-du-1',
+    college_id: 'col-du',
+    creator_id: 'rahul-du',
+    title: 'Financial Analyst Intern (Winter 2026)',
+    organization: 'Deloitte Campus Consulting Group',
+    type: 'internship' as any,
+    location: 'Connaught Place / Hybrid',
+    deadline: '2026-10-25',
+    link: 'https://deloitte.com/careers',
+    created_at: '2026-09-19T10:00:00Z',
+  },
+];
+
+const SEED_TEAM_REQUESTS: TeamRequest[] = [
+  // IIT Bombay
+  {
+    id: 'team-iitb-1',
+    college_id: 'col-iitb',
+    creator_id: 'ashu-devops-iitb',
+    title: 'Building Real-time Campus IoT Mesh for Smart Energy Tracking',
+    description: 'Looking for 1 Embedded C/Rust developer and 1 UI developer to compete in the National Smart Energy Hackathon next month.',
+    skills_needed: ['Rust', 'Embedded C', 'React', 'MQTT'],
+    people_needed: 2,
+    project_type: 'Hackathon',
+    deadline: '2026-10-10',
+    status: 'open',
+    created_at: '2026-09-16T11:00:00Z',
+  },
+  // Delhi University
+  {
+    id: 'team-du-1',
+    college_id: 'col-du',
+    creator_id: 'rahul-du',
+    title: 'Case Study Competition Team for National B-School League',
+    description: 'Looking for a quantitative data analyst and a slide deck designer to compete in the upcoming Harvard USG Business Cup.',
+    skills_needed: ['Financial Modeling', 'Excel', 'Canva/Figma', 'Pitching'],
+    people_needed: 2,
+    project_type: 'Case Competition',
+    deadline: '2026-10-15',
+    status: 'open',
+    created_at: '2026-09-17T15:00:00Z',
+  },
+];
+
+const SEED_MARKETPLACE: MarketplaceListing[] = [
+  // IIT Bombay
+  {
+    id: 'market-iitb-1',
+    college_id: 'col-iitb',
+    seller_id: 'ashu-devops-iitb',
+    title: 'Hercules Road Cycle - Excellent Campus Commuter',
+    description: 'Serviced last month with new tires, wire lock included. Perfect for moving between Hostel 13 and Lecture Hall Complex.',
+    price: 2800,
+    category: 'Bicycles & Transport' as any,
+    condition: 'Good' as any,
+    status: 'active',
+    is_sold: false,
+    contact_count: 7,
+    images: ['https://images.unsplash.com/photo-1485965120184-e220f721d03e?w=800&auto=format&fit=crop&q=80'],
+    created_at: '2026-09-19T08:00:00Z',
+  },
+  {
+    id: 'market-iitb-2',
+    college_id: 'col-iitb',
+    seller_id: 'priya-iitb',
+    title: 'Casio fx-991EX Scientific Calculator',
+    description: 'Approved for semester exams. Mint condition with original snap-on protective cover and manual.',
+    price: 750,
+    category: 'Electronics' as any,
+    condition: 'Like New' as any,
+    status: 'active',
+    is_sold: false,
+    contact_count: 12,
+    images: ['https://images.unsplash.com/photo-1594980596870-8aa52a78d8cd?w=800&auto=format&fit=crop&q=80'],
+    created_at: '2026-09-20T14:00:00Z',
+  },
+  // Delhi University
+  {
+    id: 'market-du-1',
+    college_id: 'col-du',
+    seller_id: 'rahul-du',
+    title: 'Mankiw Principles of Economics (Complete 8th Edition)',
+    description: 'Clean pages, no excessive highlighting. Must-have for 1st and 2nd year B.A. Economics honors.',
+    price: 450,
+    category: 'Textbooks & Notes' as any,
+    condition: 'Good' as any,
+    status: 'active',
+    is_sold: false,
+    contact_count: 5,
+    images: ['https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=800&auto=format&fit=crop&q=80'],
+    created_at: '2026-09-21T09:00:00Z',
+  },
+];
+
+// Helper to get / save local storage per category
+function getLocalStore<T>(key: string, initialData: T[]): T[] {
+  try {
+    const raw = localStorage.getItem(key);
+    if (!raw) {
+      localStorage.setItem(key, JSON.stringify(initialData));
+      return initialData;
+    }
+    return JSON.parse(raw);
+  } catch {
+    return initialData;
+  }
+}
+
+function saveLocalStore<T>(key: string, data: T[]): void {
+  try {
+    localStorage.setItem(key, JSON.stringify(data));
+  } catch (err) {
+    console.warn(`Failed to save ${key} to localStorage:`, err);
+  }
+}
+
+// ==========================================
 // 1. CLUBS
 // ==========================================
 
 export async function fetchClubs(collegeId?: string | null, userId?: string | null): Promise<Club[]> {
-  if (!isSupabaseConfigured) return [];
+  if (!isSupabaseConfigured) {
+    const clubs = getLocalStore<Club>('campusgram_clubs_store', SEED_CLUBS);
+    if (!collegeId) return clubs;
+    return clubs.filter((c) => c.college_id === collegeId);
+  }
 
   try {
     let query = supabase
@@ -33,7 +420,6 @@ export async function fetchClubs(collegeId?: string | null, userId?: string | nu
     if (error) throw error;
     if (!data) return [];
 
-    // Check membership and count for each
     const clubIds = data.map((c: any) => c.id);
     const { data: memberRows } = await supabase
       .from('club_members')
@@ -65,7 +451,12 @@ export async function fetchClubs(collegeId?: string | null, userId?: string | nu
 }
 
 export async function joinClub(clubId: string, userId: string): Promise<{ success: boolean; error?: any }> {
-  if (!isSupabaseConfigured) return { success: true };
+  if (!isSupabaseConfigured) {
+    const clubs = getLocalStore<Club>('campusgram_clubs_store', SEED_CLUBS);
+    const updated = clubs.map((c) => (c.id === clubId ? { ...c, member_count: (c.member_count ?? 0) + 1, is_member: true } : c));
+    saveLocalStore('campusgram_clubs_store', updated);
+    return { success: true };
+  }
   try {
     const { error } = await supabase.from('club_members').insert({
       club_id: clubId,
@@ -80,7 +471,12 @@ export async function joinClub(clubId: string, userId: string): Promise<{ succes
 }
 
 export async function leaveClub(clubId: string, userId: string): Promise<{ success: boolean; error?: any }> {
-  if (!isSupabaseConfigured) return { success: true };
+  if (!isSupabaseConfigured) {
+    const clubs = getLocalStore<Club>('campusgram_clubs_store', SEED_CLUBS);
+    const updated = clubs.map((c) => (c.id === clubId ? { ...c, member_count: Math.max(0, (c.member_count ?? 1) - 1), is_member: false } : c));
+    saveLocalStore('campusgram_clubs_store', updated);
+    return { success: true };
+  }
   try {
     const { error } = await supabase
       .from('club_members')
@@ -119,6 +515,8 @@ export async function createClub(params: {
       is_member: true,
       is_admin: true,
     };
+    const clubs = getLocalStore<Club>('campusgram_clubs_store', SEED_CLUBS);
+    saveLocalStore('campusgram_clubs_store', [fallback, ...clubs]);
     return { club: fallback };
   }
 
@@ -141,7 +539,6 @@ export async function createClub(params: {
 
     if (error) throw error;
 
-    // Automatically make creator an admin in club_members
     await supabase.from('club_members').insert({
       club_id: data.id,
       user_id: params.creatorId,
@@ -166,7 +563,11 @@ export async function createClub(params: {
 // ==========================================
 
 export async function fetchEvents(collegeId?: string | null, userId?: string | null): Promise<EventItem[]> {
-  if (!isSupabaseConfigured) return [];
+  if (!isSupabaseConfigured) {
+    const events = getLocalStore<EventItem>('campusgram_events_store', SEED_EVENTS);
+    if (!collegeId) return events;
+    return events.filter((e) => e.college_id === collegeId);
+  }
 
   try {
     let query = supabase
@@ -184,7 +585,6 @@ export async function fetchEvents(collegeId?: string | null, userId?: string | n
     if (error) throw error;
     if (!data) return [];
 
-    // Get registration statuses
     let registeredEventIds = new Set<string>();
     let checkedInEventIds = new Set<string>();
 
@@ -210,7 +610,14 @@ export async function fetchEvents(collegeId?: string | null, userId?: string | n
 }
 
 export async function registerForEvent(eventId: string, userId: string): Promise<{ success: boolean; error?: any }> {
-  if (!isSupabaseConfigured) return { success: true };
+  if (!isSupabaseConfigured) {
+    const events = getLocalStore<EventItem>('campusgram_events_store', SEED_EVENTS);
+    const updated = events.map((e) =>
+      e.id === eventId ? { ...e, is_registered: true, registered_count: (e.registered_count || 0) + 1 } : e
+    );
+    saveLocalStore('campusgram_events_store', updated);
+    return { success: true };
+  }
   try {
     const { error } = await supabase.from('event_registrations').insert({
       event_id: eventId,
@@ -225,7 +632,14 @@ export async function registerForEvent(eventId: string, userId: string): Promise
 }
 
 export async function cancelEventRegistration(eventId: string, userId: string): Promise<{ success: boolean; error?: any }> {
-  if (!isSupabaseConfigured) return { success: true };
+  if (!isSupabaseConfigured) {
+    const events = getLocalStore<EventItem>('campusgram_events_store', SEED_EVENTS);
+    const updated = events.map((e) =>
+      e.id === eventId ? { ...e, is_registered: false, registered_count: Math.max(0, (e.registered_count || 1) - 1) } : e
+    );
+    saveLocalStore('campusgram_events_store', updated);
+    return { success: true };
+  }
   try {
     const { error } = await supabase
       .from('event_registrations')
@@ -265,7 +679,10 @@ export async function createEvent(params: {
       status: 'upcoming',
       created_at: new Date().toISOString(),
       is_registered: false,
+      registered_count: 1,
     };
+    const events = getLocalStore<EventItem>('campusgram_events_store', SEED_EVENTS);
+    saveLocalStore('campusgram_events_store', [fallback, ...events]);
     return { event: fallback };
   }
 
@@ -304,11 +721,10 @@ export async function checkinStudentToEvent(params: {
   checkinToken: string;
 }): Promise<{ success: boolean; message: string }> {
   if (!isSupabaseConfigured) {
-    return { success: true, message: 'Check-in confirmed successfully!' };
+    return { success: true, message: 'Check-in verified successfully!' };
   }
 
   try {
-    // Check if student already checked in
     const { data: existing } = await supabase
       .from('event_checkins')
       .select('id, checked_in_at')
@@ -319,7 +735,7 @@ export async function checkinStudentToEvent(params: {
     if (existing) {
       return {
         success: false,
-        message: 'Duplicate check-in detected! You have already checked in to this event.',
+        message: 'Duplicate check-in detected! You have already checked in.',
       };
     }
 
@@ -330,7 +746,6 @@ export async function checkinStudentToEvent(params: {
     });
 
     if (error) throw error;
-
     return { success: true, message: 'Check-in successful! Welcome to the event.' };
   } catch (err: any) {
     return { success: false, message: err.message || 'Check-in failed.' };
@@ -342,7 +757,11 @@ export async function checkinStudentToEvent(params: {
 // ==========================================
 
 export async function fetchAnnouncements(collegeId?: string | null): Promise<Announcement[]> {
-  if (!isSupabaseConfigured) return [];
+  if (!isSupabaseConfigured) {
+    const announcements = getLocalStore<Announcement>('campusgram_announcements_store', SEED_ANNOUNCEMENTS);
+    if (!collegeId) return announcements;
+    return announcements.filter((a) => a.college_id === collegeId);
+  }
 
   try {
     let query = supabase
@@ -389,6 +808,8 @@ export async function createAnnouncement(params: {
       target_audience: 'all',
       created_at: new Date().toISOString(),
     };
+    const announcements = getLocalStore<Announcement>('campusgram_announcements_store', SEED_ANNOUNCEMENTS);
+    saveLocalStore('campusgram_announcements_store', [fallback, ...announcements]);
     return { announcement: fallback };
   }
 
@@ -420,7 +841,7 @@ export async function createAnnouncement(params: {
 }
 
 // ==========================================
-// 4. NOTES & RESOURCES (COURSE -> SUBJECT -> RESOURCES)
+// 4. NOTES & RESOURCES
 // ==========================================
 
 export async function fetchResources(params: {
@@ -428,7 +849,19 @@ export async function fetchResources(params: {
   course?: string | null;
   subject?: string | null;
 } = {}): Promise<ResourceItem[]> {
-  if (!isSupabaseConfigured) return [];
+  if (!isSupabaseConfigured) {
+    let resources = getLocalStore<ResourceItem>('campusgram_resources_store', SEED_RESOURCES);
+    if (params.collegeId) {
+      resources = resources.filter((r) => r.college_id === params.collegeId);
+    }
+    if (params.course && params.course !== 'All Courses') {
+      resources = resources.filter((r) => r.course.toLowerCase().includes(params.course!.toLowerCase()));
+    }
+    if (params.subject && params.subject !== 'All Subjects') {
+      resources = resources.filter((r) => r.subject.toLowerCase().includes(params.subject!.toLowerCase()));
+    }
+    return resources;
+  }
 
   try {
     let query = supabase
@@ -482,6 +915,8 @@ export async function uploadResource(params: {
       verification_status: 'student_uploaded',
       created_at: new Date().toISOString(),
     };
+    const list = getLocalStore<ResourceItem>('campusgram_resources_store', SEED_RESOURCES);
+    saveLocalStore('campusgram_resources_store', [fallback, ...list]);
     return { resource: fallback };
   }
 
@@ -515,25 +950,17 @@ export async function uploadResource(params: {
   }
 }
 
-export async function incrementResourceDownload(resourceId: string): Promise<void> {
-  if (!isSupabaseConfigured) return;
-  try {
-    const { data } = await supabase.from('resources').select('downloads_count').eq('id', resourceId).single();
-    if (data) {
-      await supabase
-        .from('resources')
-        .update({ downloads_count: (data.downloads_count || 0) + 1 })
-        .eq('id', resourceId);
-    }
-  } catch {}
-}
-
 // ==========================================
 // 5. OPPORTUNITIES
 // ==========================================
 
 export async function fetchOpportunities(collegeId?: string | null, type?: string | null): Promise<Opportunity[]> {
-  if (!isSupabaseConfigured) return [];
+  if (!isSupabaseConfigured) {
+    let opps = getLocalStore<Opportunity>('campusgram_opportunities_store', SEED_OPPORTUNITIES);
+    if (collegeId) opps = opps.filter((o) => o.college_id === collegeId);
+    if (type && type !== 'all') opps = opps.filter((o) => o.type === type);
+    return opps;
+  }
 
   try {
     let query = supabase
@@ -579,6 +1006,8 @@ export async function createOpportunity(params: {
       deadline: params.deadline || null,
       created_at: new Date().toISOString(),
     };
+    const opps = getLocalStore<Opportunity>('campusgram_opportunities_store', SEED_OPPORTUNITIES);
+    saveLocalStore('campusgram_opportunities_store', [fallback, ...opps]);
     return { opportunity: fallback };
   }
 
@@ -610,7 +1039,11 @@ export async function createOpportunity(params: {
 // ==========================================
 
 export async function fetchTeamRequests(collegeId?: string | null): Promise<TeamRequest[]> {
-  if (!isSupabaseConfigured) return [];
+  if (!isSupabaseConfigured) {
+    let requests = getLocalStore<TeamRequest>('campusgram_team_store', SEED_TEAM_REQUESTS);
+    if (collegeId) requests = requests.filter((r) => r.college_id === collegeId);
+    return requests;
+  }
 
   try {
     let query = supabase
@@ -658,6 +1091,8 @@ export async function createTeamRequest(params: {
       status: 'open',
       created_at: new Date().toISOString(),
     };
+    const list = getLocalStore<TeamRequest>('campusgram_team_store', SEED_TEAM_REQUESTS);
+    saveLocalStore('campusgram_team_store', [fallback, ...list]);
     return { request: fallback };
   }
 
@@ -695,7 +1130,14 @@ export async function createTeamRequest(params: {
 // ==========================================
 
 export async function fetchMarketplaceListings(collegeId?: string | null, category?: string | null): Promise<MarketplaceListing[]> {
-  if (!isSupabaseConfigured) return [];
+  if (!isSupabaseConfigured) {
+    let listings = getLocalStore<MarketplaceListing>('campusgram_marketplace_store', SEED_MARKETPLACE);
+    if (collegeId) listings = listings.filter((l) => l.college_id === collegeId);
+    if (category && category !== 'all' && category !== 'All') {
+      listings = listings.filter((l) => (l.category || '').toLowerCase() === category.toLowerCase());
+    }
+    return listings;
+  }
 
   try {
     let query = supabase
@@ -710,7 +1152,7 @@ export async function fetchMarketplaceListings(collegeId?: string | null, catego
       .order('created_at', { ascending: false });
 
     if (collegeId) query = query.eq('college_id', collegeId);
-    if (category && category !== 'all') query = query.eq('category', category);
+    if (category && category !== 'all' && category !== 'All') query = query.eq('category', category);
 
     const { data, error } = await query;
     if (error) throw error;
@@ -747,6 +1189,8 @@ export async function createMarketplaceListing(params: {
       images: params.images,
       created_at: new Date().toISOString(),
     };
+    const list = getLocalStore<MarketplaceListing>('campusgram_marketplace_store', SEED_MARKETPLACE);
+    saveLocalStore('campusgram_marketplace_store', [fallback, ...list]);
     return { listing: fallback };
   }
 
@@ -782,7 +1226,12 @@ export async function createMarketplaceListing(params: {
 }
 
 export async function markListingSold(listingId: string): Promise<boolean> {
-  if (!isSupabaseConfigured) return true;
+  if (!isSupabaseConfigured) {
+    const list = getLocalStore<MarketplaceListing>('campusgram_marketplace_store', SEED_MARKETPLACE);
+    const updated = list.map((l) => (l.id === listingId ? { ...l, is_sold: true, status: 'sold' } : l));
+    saveLocalStore('campusgram_marketplace_store', updated);
+    return true;
+  }
   try {
     const { error } = await supabase
       .from('marketplace_listings')
@@ -797,8 +1246,8 @@ export async function markListingSold(listingId: string): Promise<boolean> {
 // Unified campusService adapter
 export const campusService = {
   // Clubs
-  getClubs: async (category?: string): Promise<Club[]> => {
-    const clubs = await fetchClubs();
+  getClubs: async (category?: string, collegeId?: string | null, userId?: string | null): Promise<Club[]> => {
+    const clubs = await fetchClubs(collegeId, userId);
     if (!category || category === 'All') return clubs;
     return clubs.filter((c) => c.category.toLowerCase() === category.toLowerCase());
   },
@@ -813,7 +1262,10 @@ export const campusService = {
     return { isMember: !!data, role: data?.role as any };
   },
   getClubEvents: async (clubId: string): Promise<EventItem[]> => {
-    if (!isSupabaseConfigured) return [];
+    if (!isSupabaseConfigured) {
+      const events = getLocalStore<EventItem>('campusgram_events_store', SEED_EVENTS);
+      return events.filter((e) => e.club_id === clubId);
+    }
     const { data } = await supabase
       .from('events')
       .select('*')
@@ -822,7 +1274,10 @@ export const campusService = {
     return (data || []) as EventItem[];
   },
   getClubAnnouncements: async (clubId: string): Promise<Announcement[]> => {
-    if (!isSupabaseConfigured) return [];
+    if (!isSupabaseConfigured) {
+      const ann = getLocalStore<Announcement>('campusgram_announcements_store', SEED_ANNOUNCEMENTS);
+      return ann.filter((a) => a.club_id === clubId);
+    }
     const { data } = await supabase
       .from('announcements')
       .select('*')
@@ -857,8 +1312,8 @@ export const campusService = {
   },
 
   // Events
-  getEvents: async (filter?: 'upcoming' | 'registered' | 'past', userId?: string): Promise<EventItem[]> => {
-    const events = await fetchEvents(null, userId);
+  getEvents: async (filter?: 'upcoming' | 'registered' | 'past', userId?: string, collegeId?: string | null): Promise<EventItem[]> => {
+    const events = await fetchEvents(collegeId, userId);
     const now = new Date();
     if (filter === 'registered') {
       return events.filter((e) => e.is_registered);
@@ -921,8 +1376,8 @@ export const campusService = {
   },
 
   // Announcements
-  getAnnouncements: async (priority?: string): Promise<Announcement[]> => {
-    const data = await fetchAnnouncements();
+  getAnnouncements: async (priority?: string, collegeId?: string | null): Promise<Announcement[]> => {
+    const data = await fetchAnnouncements(collegeId);
     if (!priority || priority === 'all') return data;
     return data.filter((a) => a.priority === priority);
   },
@@ -948,14 +1403,12 @@ export const campusService = {
   },
 
   // Notes & Resources
-  getResources: async (filter?: { course?: string; subject?: string }): Promise<ResourceItem[]> => {
-    let resources = await fetchResources();
-    if (filter?.course && filter.course !== 'All Courses') {
-      resources = resources.filter((r) => r.course.toLowerCase() === filter.course!.toLowerCase());
-    }
-    if (filter?.subject && filter.subject !== 'All Subjects') {
-      resources = resources.filter((r) => r.subject.toLowerCase() === filter.subject!.toLowerCase());
-    }
+  getResources: async (filter?: { course?: string; subject?: string }, collegeId?: string | null): Promise<ResourceItem[]> => {
+    let resources = await fetchResources({
+      collegeId,
+      course: filter?.course,
+      subject: filter?.subject,
+    });
     return resources;
   },
   uploadResource: async (payload: {
@@ -984,7 +1437,12 @@ export const campusService = {
     return res.resource!;
   },
   incrementResourceDownloads: async (resourceId: string): Promise<boolean> => {
-    if (!isSupabaseConfigured) return true;
+    if (!isSupabaseConfigured) {
+      const list = getLocalStore<ResourceItem>('campusgram_resources_store', SEED_RESOURCES);
+      const updated = list.map((r) => (r.id === resourceId ? { ...r, downloads_count: (r.downloads_count || 0) + 1 } : r));
+      saveLocalStore('campusgram_resources_store', updated);
+      return true;
+    }
     try {
       const { data } = await supabase
         .from('resources')
@@ -1003,10 +1461,10 @@ export const campusService = {
   },
 
   // Opportunities
-  getOpportunities: async (category?: string): Promise<Opportunity[]> => {
-    const data = await fetchOpportunities();
+  getOpportunities: async (category?: string, collegeId?: string | null): Promise<Opportunity[]> => {
+    const data = await fetchOpportunities(collegeId);
     if (!category || category === 'All') return data;
-    return data.filter((o) => (o.category || o.type || '').toLowerCase() === category.toLowerCase());
+    return data.filter((o) => (o.type || '').toLowerCase() === category.toLowerCase());
   },
   createOpportunity: async (payload: {
     college_id: string;
@@ -1032,15 +1490,15 @@ export const campusService = {
     if (res.error) throw res.error;
     return {
       ...res.opportunity!,
-      company: payload.company,
+      organization: payload.company,
       description: payload.description,
-      apply_url: payload.apply_url,
+      link: payload.apply_url || null,
     };
   },
 
   // Team Requests
-  getTeamRequests: async (): Promise<TeamRequest[]> => {
-    return fetchTeamRequests();
+  getTeamRequests: async (collegeId?: string | null): Promise<TeamRequest[]> => {
+    return fetchTeamRequests(collegeId);
   },
   createTeamRequest: async (payload: {
     college_id: string;
@@ -1060,14 +1518,13 @@ export const campusService = {
       projectType: 'General Collaboration',
     });
     if (res.error) throw res.error;
-    return (res.request || (res as any).teamRequest)!;
+    return res.request!;
   },
 
   // Marketplace
-  getMarketplaceListings: async (category?: string): Promise<MarketplaceListing[]> => {
-    const listings = await fetchMarketplaceListings();
-    if (!category || category === 'All') return listings;
-    return listings.filter((l) => (l.category || '').toLowerCase() === category.toLowerCase());
+  getMarketplaceListings: async (category?: string, collegeId?: string | null): Promise<MarketplaceListing[]> => {
+    const listings = await fetchMarketplaceListings(collegeId, category);
+    return listings;
   },
   createMarketplaceListing: async (payload: {
     college_id: string;
@@ -1108,4 +1565,3 @@ export const campusService = {
     }
   },
 };
-

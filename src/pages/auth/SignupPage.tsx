@@ -21,6 +21,7 @@ import {
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase, isSupabaseConfigured } from '@/lib/supabase';
 import { College } from '@/types/database.types';
+import { getAllColleges, registerNewCollege } from '@/services/collegesService';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/Card';
@@ -69,19 +70,7 @@ export const SignupPage: React.FC = () => {
   const [serverError, setServerError] = useState<string | null>(null);
 
   useEffect(() => {
-    async function loadColleges() {
-      if (!isSupabaseConfigured) return;
-      try {
-        const { data } = await supabase
-          .from('colleges')
-          .select('*')
-          .eq('status', 'active');
-        if (data) setColleges(data);
-      } catch (err) {
-        console.warn('Colleges list load notice:', err);
-      }
-    }
-    loadColleges();
+    setColleges(getAllColleges());
   }, []);
 
   const {
@@ -96,10 +85,10 @@ export const SignupPage: React.FC = () => {
       phone: '',
       password: '',
       confirmPassword: '',
-      collegeId: '',
+      collegeId: 'col-iitb',
       collegeName: '',
-      course: '',
-      branch: '',
+      course: 'B.Tech Computer Science',
+      branch: 'Engineering',
       year: '1st Year',
     },
   });
@@ -111,20 +100,11 @@ export const SignupPage: React.FC = () => {
     try {
       let finalCollegeId = values.collegeId;
 
-      // If user typed custom college or no colleges exist in DB yet, create one
-      if (!finalCollegeId && values.collegeName && isSupabaseConfigured) {
+      // If user typed custom college, register it
+      if (!finalCollegeId && values.collegeName) {
         const domain = values.email.split('@')[1] || 'campus.edu';
-        const { data: newCollege } = await supabase
-          .from('colleges')
-          .insert({
-            name: values.collegeName,
-            domain: domain,
-            status: 'active',
-          })
-          .select()
-          .single();
-
-        if (newCollege) finalCollegeId = newCollege.id;
+        const newCol = registerNewCollege(values.collegeName, domain);
+        finalCollegeId = newCol.id;
       }
 
       const { data, error } = await signUp({

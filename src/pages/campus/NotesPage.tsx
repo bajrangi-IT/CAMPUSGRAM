@@ -56,7 +56,7 @@ const SAMPLE_SUBJECTS: Record<string, string[]> = {
 };
 
 export const NotesPage: React.FC = () => {
-  const { user, college } = useAuth();
+  const { user, profile, college } = useAuth();
   const [resources, setResources] = useState<ResourceItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -76,13 +76,18 @@ export const NotesPage: React.FC = () => {
   const [verificationStatus, setVerificationStatus] = useState<'student_uploaded' | 'faculty_verified' | 'club_verified'>('student_uploaded');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const activeCollegeId = college?.id || profile?.college_id;
+
   const loadResources = async () => {
     setIsLoading(true);
     try {
-      const data = await campusService.getResources({
-        course: selectedCourse === 'All Courses' ? undefined : selectedCourse,
-        subject: selectedSubject === 'All Subjects' ? undefined : selectedSubject,
-      });
+      const data = await campusService.getResources(
+        {
+          course: selectedCourse === 'All Courses' ? undefined : selectedCourse,
+          subject: selectedSubject === 'All Subjects' ? undefined : selectedSubject,
+        },
+        activeCollegeId
+      );
       setResources(data);
     } catch (err: any) {
       toast.error('Failed to load study resources', { description: err.message });
@@ -93,7 +98,7 @@ export const NotesPage: React.FC = () => {
 
   useEffect(() => {
     loadResources();
-  }, [selectedCourse, selectedSubject]);
+  }, [selectedCourse, selectedSubject, activeCollegeId]);
 
   const handleDownload = async (resource: ResourceItem) => {
     try {

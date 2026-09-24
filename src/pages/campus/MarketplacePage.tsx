@@ -36,7 +36,7 @@ const MARKETPLACE_CATEGORIES = [
 ];
 
 export const MarketplacePage: React.FC = () => {
-  const { user, college } = useAuth();
+  const { user, profile, college } = useAuth();
   const navigate = useNavigate();
   const [listings, setListings] = useState<MarketplaceListing[]>([]);
   const [selectedCategory, setSelectedCategory] = useState('All');
@@ -53,11 +53,14 @@ export const MarketplacePage: React.FC = () => {
   const [description, setDescription] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const activeCollegeId = college?.id || profile?.college_id;
+
   const loadListings = async () => {
     setIsLoading(true);
     try {
       const data = await campusService.getMarketplaceListings(
-        selectedCategory === 'All' ? undefined : selectedCategory
+        selectedCategory === 'All' ? undefined : selectedCategory,
+        activeCollegeId
       );
       setListings(data);
     } catch (err: any) {
@@ -69,7 +72,7 @@ export const MarketplacePage: React.FC = () => {
 
   useEffect(() => {
     loadListings();
-  }, [selectedCategory]);
+  }, [selectedCategory, activeCollegeId]);
 
   const handleCreateListing = async (e: React.FormEvent) => {
     e.preventDefault();

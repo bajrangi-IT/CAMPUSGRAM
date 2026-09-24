@@ -88,6 +88,58 @@ const SEED_POSTS: Post[] = [
     is_liked: false,
     is_saved: false,
   },
+  {
+    id: 'post-seed-du-01',
+    author_id: 'usr-du-student-01',
+    author: {
+      id: 'usr-du-student-01',
+      full_name: 'Rohan Verma',
+      username: 'rohan.du',
+      profile_photo: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=400&auto=format&fit=crop&q=80',
+      course: 'B.A. (Hons) Economics',
+      year: '2nd Year',
+      branch: 'Delhi School of Economics',
+    },
+    college_id: 'col-du',
+    content: '🏛️ North Campus debate society auditions are open! Looking for parliamentary debaters and researchers for the upcoming Inter-University Mock Parliament.',
+    media_urls: [],
+    link_url: '/campus/clubs',
+    link_title: 'DU Debating Society Auditions',
+    visibility: 'campus',
+    likes_count: 45,
+    comments_count: 12,
+    created_at: new Date(Date.now() - 3600000 * 8).toISOString(),
+    updated_at: new Date(Date.now() - 3600000 * 8).toISOString(),
+    is_liked: false,
+    is_saved: false,
+  },
+  {
+    id: 'post-seed-bits-01',
+    author_id: 'usr-bits-lead-01',
+    author: {
+      id: 'usr-bits-lead-01',
+      full_name: 'Ananya Deshmukh',
+      username: 'ananya.bits',
+      profile_photo: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=400&auto=format&fit=crop&q=80',
+      course: 'B.E. Computer Science',
+      year: '3rd Year',
+      branch: 'Pilani Campus',
+    },
+    college_id: 'col-bits',
+    content: '⚡ APOGEE Hackathon registration is live! 48-hour product build with cloud credits sponsored by top campus partners. Form your team on CampusGram!',
+    media_urls: [
+      'https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=800&auto=format&fit=crop&q=80'
+    ],
+    link_url: '/campus/team-finder',
+    link_title: 'Find APOGEE Teammates',
+    visibility: 'campus',
+    likes_count: 73,
+    comments_count: 18,
+    created_at: new Date(Date.now() - 3600000 * 6).toISOString(),
+    updated_at: new Date(Date.now() - 3600000 * 6).toISOString(),
+    is_liked: false,
+    is_saved: false,
+  },
 ];
 
 function getStoredPosts(): Post[] {
@@ -183,6 +235,11 @@ export async function fetchFeedPosts(
   // Local / Fallback store
   const allPosts = getStoredPosts();
   let filtered = [...allPosts];
+
+  // Enforce Campus Isolation: Students only see content from their campus environment
+  if (context?.collegeId) {
+    filtered = filtered.filter((p) => p.college_id === context.collegeId);
+  }
 
   if (category === 'trending') {
     filtered.sort((a, b) => (b.likes_count || 0) - (a.likes_count || 0));

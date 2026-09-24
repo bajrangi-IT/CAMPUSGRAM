@@ -19,12 +19,6 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     return <LoadingState fullPage message="Authenticating campus session..." />;
   }
 
-  // If Supabase is not configured yet (e.g. initial setup before keys entered),
-  // allow viewing the app layout with polite warning banner so developers can inspect and verify.
-  if (!isConfigured) {
-    return children;
-  }
-
   if (!user) {
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
